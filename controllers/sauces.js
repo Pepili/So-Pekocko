@@ -41,23 +41,27 @@ exports.likeSauce = (req, res, next) => {
     .findOne({ _id: sauceId })
     .then((Sauce) => {
       // on cherche la présence de l'userId dans les 2 tableaux
-      const likeUserId = Sauce.usersLiked.findIndex((id) => id === userId);
-      const dislikeUserId = Sauce.usersDisliked.findIndex(
+      const likeUserIdIndex = Sauce.usersLiked.findIndex((id) => id === userId);
+      const dislikeUserIdIndex = Sauce.usersDisliked.findIndex(
         (id) => id === userId
       );
       // Si l'userId est présent dans aucun array, on l'ajoute à like
-      if (like === 1 && likeUserId === -1 && dislikeUserId === -1) {
+      if (like === 1 && likeUserIdIndex === -1 && dislikeUserIdIndex === -1) {
         Sauce.usersLiked.push(userId);
         res.status(200).json({ message: "User liked" });
 
         //Si on veut retirer un vote, on le supprime de partout
       } else if (like === 0) {
-        Sauce.usersDisliked.splice(dislikeUserId, 1);
-        Sauce.usersLiked.splice(likeUserId, 1);
+        Sauce.usersDisliked.splice(dislikeUserIdIndex, 1);
+        Sauce.usersLiked.splice(likeUserIdIndex, 1);
         res.status(200).json({ message: "User has deleted his review" });
 
         //Si l'userId est présent dans aucun array, on l'ajoute à dislike
-      } else if (like === -1 && likeUserId === -1 && dislikeUserId === -1) {
+      } else if (
+        like === -1 &&
+        likeUserIdIndex === -1 &&
+        dislikeUserIdIndex === -1
+      ) {
         Sauce.usersDisliked.push(userId);
         res.status(200).json({ message: "User disliked" });
       }
@@ -73,7 +77,7 @@ exports.likeSauce = (req, res, next) => {
 // modification d'une sauce
 exports.modifiedSauce = (req, res, next) => {
   //on verifie si req.file existe, si il existe, on traite la nouvelle image
-  const sauceObject = req.file
+  /* const sauceObject = req.file
     ? {
         ...JSON.parse(req.body.sauce),
         imageUrl: `${req.protocol}://${req.get("host")}/images/${
@@ -83,9 +87,37 @@ exports.modifiedSauce = (req, res, next) => {
     : // si il n'existe pas, on traite simplement l'objet entrant
       { ...req.body };
   sauce
-    .updateOne({ _id: req.params.id }, { ...sauceObject, _id: req.params.id })
-    .then(() => res.status(200).json({ message: "Modified sauce !" }))
-    .catch((error) => res.status(400).json({ error }));
+    .updateOne({ _id: req.params.id }, { ...sauceObject, _id: req.params.id }) */
+  if (req.file) {
+    const sauceObject = {
+      ...JSON.parse(req.body.sauce),
+      imageUrl: `${req.protocol}://${req.get("host")}/images/${
+        req.file.filename
+      }`,
+    };
+    sauce
+      .findOne({ _id: req.params.id })
+      .then((sauce) => {
+        const filename = sauce.imageUrl.split("/images/")[1];
+        fs.unlink(`images/${filename}`, (error) => {
+          if (error) res.status(400).json({ error });
+          else {
+            res.status(200).json({ message: "Modified image !" });
+          }
+        });
+      })
+      .catch((error) => res.status(500).json({ error }));
+    sauce
+      .updateOne({ _id: req.params.id }, { ...sauceObject, _id: req.params.id })
+      .then(() => res.status(200).json({ message: "Modified sauce !" }))
+      .catch((error) => res.status(400).json({ error }));
+  } else {
+    const sauceObject = { ...req.body };
+    sauce
+      .updateOne({ _id: req.params.id }, { ...sauceObject, _id: req.params.id })
+      .then(() => res.status(200).json({ message: "Modified sauce !" }))
+      .catch((error) => res.status(400).json({ error }));
+  }
 };
 
 // Suppression d'une sauce
