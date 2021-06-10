@@ -1,29 +1,43 @@
 const sauce = require("../models/sauce");
 const fs = require("fs");
+const regex =
+  /^[a-zA-ZàèìòùÀÈÌÒÙáéíóúýÁÉÍÓÚÝâêîôûÂÊÎÔÛãñõÃÑÕäëïöüÿÄËÏÖÜŸçÇßØøÅåÆæœ' -]{2,33}$/;
+const regexDescription =
+  /^[a-zA-ZàèìòùÀÈÌÒÙáéíóúýÁÉÍÓÚÝâêîôûÂÊÎÔÛãñõÃÑÕäëïöüÿÄËÏÖÜŸçÇßØøÅåÆæœ' -]{2,150}$/;
 
 // création d'une sauce
 exports.createSauce = (req, res, next) => {
   // on analyse la string sauce avec JSON.parse pour obtenir un objet utilisable
   const sauceObject = JSON.parse(req.body.sauce);
-  // suppression du faux id renvoyé par le front
-  delete sauceObject._id;
-  const Sauce = new sauce({
-    ...sauceObject,
-    /* on résout l'url de l'image en lui attribuant req.protocol 
+  if (
+    !regex.test(sauceObject.name) ||
+    !regex.test(sauceObject.manufacturer) ||
+    !regexDescription.test(sauceObject.description)
+  ) {
+    return res
+      .status(401)
+      .json({ error: "'Please fill in the form fields correctly'" });
+  } else {
+    // suppression du faux id renvoyé par le front
+    delete sauceObject._id;
+    const Sauce = new sauce({
+      ...sauceObject,
+      /* on résout l'url de l'image en lui attribuant req.protocol 
     afin d'obtenir le premier segment 'http', puis req.get('host')
     pour résendre l'hôtre du serveur(localhost:3000) puis le dossier image
     et enfin le nom du fichier (req.file.filename)*/
-    imageUrl: `${req.protocol}://${req.get("host")}/images/${
-      req.file.filename
-    }`,
-  });
-  return (
-    Sauce
-      // enregistre la méthode sauce dans la base de données
-      .save()
-      .then(() => res.status(201).json({ message: "Saved sauce" }))
-      .catch((error) => res.status(400).json({ error }))
-  );
+      imageUrl: `${req.protocol}://${req.get("host")}/images/${
+        req.file.filename
+      }`,
+    });
+    return (
+      Sauce
+        // enregistre la méthode sauce dans la base de données
+        .save()
+        .then(() => res.status(201).json({ message: "Saved sauce" }))
+        .catch((error) => res.status(400).json({ error }))
+    );
+  }
 };
 
 // Nombre de like d'une sauce
@@ -77,17 +91,6 @@ exports.likeSauce = (req, res, next) => {
 // modification d'une sauce
 exports.modifiedSauce = (req, res, next) => {
   //on verifie si req.file existe, si il existe, on traite la nouvelle image
-  /* const sauceObject = req.file
-    ? {
-        ...JSON.parse(req.body.sauce),
-        imageUrl: `${req.protocol}://${req.get("host")}/images/${
-          req.file.filename
-        }`,
-      }
-    : // si il n'existe pas, on traite simplement l'objet entrant
-      { ...req.body };
-  sauce
-    .updateOne({ _id: req.params.id }, { ...sauceObject, _id: req.params.id }) */
   if (req.file) {
     const sauceObject = {
       ...JSON.parse(req.body.sauce),

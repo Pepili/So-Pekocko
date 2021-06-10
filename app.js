@@ -33,7 +33,6 @@ app.use((req, res, next) => {
   next();
 });
 
-
 app.use(express.json());
 // indique à express de gérer la ressource images de manière statique à chaque requête vers /images
 app.use("/images", express.static(path.join(__dirname, "images")));
