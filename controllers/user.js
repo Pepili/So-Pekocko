@@ -1,11 +1,6 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const mongoMask = require("mongo-mask");
 const user = require("../models/user");
-const fieldsSettings = {
-  id: "_id",
-  email: "email",
-};
 const regexEmail =
   /^[a-zA-Z0-9.!#$%&'*+\\\/=?^_`{|}~\-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9\-]{2,63}$/;
 const regexPassword =
@@ -60,11 +55,4 @@ exports.login = (req, res, next) => {
         .catch((error) => res.status(500).json({ error }));
     })
     .catch((error) => res.status(500).json({ error }));
-};
-
-exports.me = (req, res, next) => {
-  const fields = mongoMask(fieldsSettings);
-  user.findOne({ id: req.id }, fields, (err, user) => {
-    res.status(200).json(user);
-  });
 };
