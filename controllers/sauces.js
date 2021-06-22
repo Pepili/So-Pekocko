@@ -144,7 +144,7 @@ exports.getOneSauce = (req, res) => {
 };
 
 // récupération de toute les sauces
-exports.getAllSauce = (res) => {
+exports.getAllSauce = (req, res) => {
   sauce
     // renvoyer un tableau contenant toutes les sauces
     .find()

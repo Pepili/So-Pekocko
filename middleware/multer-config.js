@@ -8,10 +8,10 @@ const MIME_TYPES = {
 };
 const storage = multer.diskStorage({
   // indique à multer d'enregistrer les fichiers dans le dossier images
-  destination: (callback) => {
+  destination: (req, file, callback) => {
     callback(null, "images");
   },
-  filename: (file, callback) => {
+  filename: (req, file, callback) => {
     // indique à multer d'utiliser le nom d'origine et de remplacer les espaces par des underscores
     const name = file.originalname.split(" ").join("_");
     // permet de résoudre l'extension de fichier appropriée

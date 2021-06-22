@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 // donne accès au chemin du système de fichier
 const path = require("path");
 const app = express();
+
 const saucesRoutes = require("./routes/sauces");
 const userRoutes = require("./routes/user");
 
@@ -18,7 +19,7 @@ mongoose
 /* Ces headers permettent d'accéder à l'API depuis n'importe quelle origine,
 d'ajouter les headers aux requêtes envoyées vers l'API,
 d'envoyer des requêtes avec les méthodes indiquées */
-app.use((res, next) => {
+app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader(
     "Access-Control-Allow-Headers",
