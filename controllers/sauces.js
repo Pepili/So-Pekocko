@@ -38,18 +38,15 @@ exports.createSauce = (req, res) => {
 
 // Nombre de like d'une sauce
 exports.likeSauce = async (req, res) => {
-  // id de l'utilisateur
   const userId = req.body.userId;
-  // type de like de l'utilisateur (like, dislike, annuler)
   const like = req.body.like;
-  // id de la sauce liké envoyé dans les paramètres de requête
   const sauceId = req.params.id;
   if (!userId || typeof like === undefined || !sauceId) {
     return res.status(400).json({ message: "not found !" });
   }
   return sauce
     .findOne({ _id: sauceId })
-    .then((Sauce) => {
+    .then(async (Sauce) => {
       // on cherche la présence de l'userId dans les 2 tableaux
       const likeUserIdIndex = Sauce.usersLiked.findIndex((id) => id === userId);
       const dislikeUserIdIndex = Sauce.usersDisliked.findIndex(
@@ -95,7 +92,7 @@ exports.modifiedSauce = async (req, res) => {
       }`,
     };
   } else {
-    var sauceObject = { ...req.body };
+    sauceObject = { ...req.body };
   }
   if (
     !regex.test(sauceObject.name.trim()) ||
