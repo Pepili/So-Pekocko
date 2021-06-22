@@ -6,19 +6,19 @@ const regexEmail =
 const regexPassword =
   /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})/;
 
-exports.signup = (req, res, next) => {
+exports.signup = (req, res) => {
   if (!regexEmail.test(req.body.email)) {
     return res
-      .status(401)
+      .status(400)
       .json({ error: "'Please fill in the form fields correctly'" });
   } else if (!regexPassword.test(req.body.password)) {
-    return res.status(401).json({
+    return res.status(400).json({
       error:
         "Your password must contain at least 8 characters, one lower case, one upper case, one number and one special character",
     });
   } else {
     bcrypt
-      .hash(req.body.password, 10)
+      .hash(req.body.password, 30)
       .then((hash) => {
         new user({
           email: req.body.email,
@@ -32,7 +32,7 @@ exports.signup = (req, res, next) => {
   }
 };
 
-exports.login = (req, res, next) => {
+exports.login = (req, res) => {
   user
     .findOne({ email: req.body.email })
     .then((user) => {
@@ -47,6 +47,7 @@ exports.login = (req, res, next) => {
           }
           res.status(200).json({
             userId: user._id,
+            // encodage d'un nouveau token signé valable 24h contenant l'userId en tant que payload
             token: jwt.sign({ userId: user._id }, "RANDOM_TOKEN_SECRET", {
               expiresIn: "24h",
             }),

@@ -1,3 +1,4 @@
+// Package permettant de gérer les fichiers entrants dans les request HTTP
 const multer = require("multer");
 
 const MIME_TYPES = {
@@ -7,10 +8,10 @@ const MIME_TYPES = {
 };
 const storage = multer.diskStorage({
   // indique à multer d'enregistrer les fichiers dans le dossier images
-  destination: (req, file, callback) => {
+  destination: (callback) => {
     callback(null, "images");
   },
-  filename: (req, file, callback) => {
+  filename: (file, callback) => {
     // indique à multer d'utiliser le nom d'origine et de remplacer les espaces par des underscores
     const name = file.originalname.split(" ").join("_");
     // permet de résoudre l'extension de fichier appropriée
