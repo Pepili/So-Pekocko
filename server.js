@@ -1,5 +1,5 @@
 // j'importe le package HTTP de Node
-const https = require("http");
+const http = require("http");
 // j'importe l'application Express
 const app = require("./app");
 
@@ -41,7 +41,7 @@ const errorHandler = (error) => {
 };
 
 // je créé un serveur en utilisant l'Http auquel je rattache l'app Express
-const server = https.createServer(app);
+const server = http.createServer(app);
 
 server.on("error", errorHandler);
 server.on("listening", () => {
